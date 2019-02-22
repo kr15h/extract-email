@@ -1,0 +1,32 @@
+#!/bin/sh
+
+GUESTLIST_IN="guestlist-src.txt"
+GUESTLIST_OUT="guestlist-out.txt"
+
+echo "Reading from ${GUESTLIST_IN}"
+
+# Get only lines with email addresses
+cat "${GUESTLIST_IN}" | grep @ > "01_email-lines.txt"
+
+# Remove whitespace
+cat "01_email-lines.txt" | sed -E 's/^[ ]*//' > "02_email-whitespace.txt"
+
+# Remove text before emails
+cat "02_email-whitespace.txt" | sed -E 's/.*<//' > "03_email-clean-before.txt"
+
+# Remove text after emails
+cat "03_email-clean-before.txt" | sed -E 's/[>,][ ]*.*//' > "04_email-clean-after.txt"
+
+# Glue emails together in a comma-separated list
+cat "04_email-clean-after.txt" | sed -E 's/(.*)/\1,/' > "05_email-glue.txt"
+
+# Beautify, add space after comma
+cat "05_email-glue.txt" | tr '\n' ' ' > "06_email-one-line.txt"
+
+# Beautify, remove trailing comma
+cat "06_email-one-line.txt" | sed -E 's/, $//' > "${GUESTLIST_OUT}"
+
+# Clean up, comment out to debug
+rm "0"*".txt"
+
+echo "Result saved in ${GUESTLIST_OUT}"
